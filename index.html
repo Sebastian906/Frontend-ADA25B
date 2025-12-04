@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Analizador automático de complejidades algorítmicas con IA">
+    <title>Analizador de Complejidades Algorítmicas</title>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- Mermaid.js para diagramas -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- Favicon (opcional) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header fade-in-down">
+        <div class="container">
+            <h1>Analizador de Complejidades</h1>
+            <p>Análisis automático de algoritmos con inteligencia artificial</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Editor Section -->
+        <section class="editor-section fade-in-up delay-1">
+            <div class="editor-header">
+                <h2>Editor de Pseudocódigo</h2>
+                <div class="editor-controls">
+                    <select id="code-type">
+                        <option value="pseudocode">Pseudocódigo</option>
+                        <option value="python">Python</option>
+                    </select>
+                    <button id="load-example">Cargar Ejemplo</button>
+                    <button id="clear-btn">Limpiar</button>
+                </div>
+            </div>
+            
+            <textarea 
+                id="code-input" 
+                placeholder="Ingresa tu pseudocódigo aquí...
+
+Ejemplo:
+function busquedaBinaria(arr, x)
+    izquierda = 0
+    derecha = n - 1
+    
+    while izquierda <= derecha do
+        medio = (izquierda + derecha) / 2
+        ...
+    end
+end"
+                spellcheck="false"
+            ></textarea>
+            
+            <button id="analyze-btn" class="btn-primary">
+                Analizar Algoritmo
+            </button>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="results-section hidden">
+            <!-- Complejidades -->
+            <div class="card result-appear">
+                <h3>Análisis de Complejidad</h3>
+                <div class="complexity-grid">
+                    <div class="complexity-item">
+                        <span class="label">Big-O (Peor caso):</span>
+                        <span id="big-o" class="value">-</span>
+                    </div>
+                    <div class="complexity-item">
+                        <span class="label">Omega (Mejor caso):</span>
+                        <span id="omega" class="value">-</span>
+                    </div>
+                    <div class="complexity-item">
+                        <span class="label">Theta (Caso promedio):</span>
+                        <span id="theta" class="value">-</span>
+                    </div>
+                </div>
+                <p id="explanation" class="explanation">
+                    Análisis de complejidad temporal del algoritmo
+                </p>
+            </div>
+
+            <!-- Patrones -->
+            <div class="card result-appear">
+                <h3>Patrones Detectados</h3>
+                <div id="patterns-list"></div>
+            </div>
+
+            <!-- Diagramas -->
+            <div class="card result-appear">
+                <h3>Visualización</h3>
+                <div id="diagram-container"></div>
+            </div>
+
+            <!-- Archivos Generados -->
+            <div class="card result-appear">
+                <h3>Archivos Generados</h3>
+                <div id="files-list"></div>
+            </div>
+        </section>
+
+        <!-- Loading -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Analizando algoritmo<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Proyecto ADA - Análisis de Algoritmos 2025</p>
+        <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+            Sebastián Salazar Güiza - 906 & Seider Sanín Giraldo - 22135
+        </p>
+    </footer>
+
+    <!-- Scripts - IMPORTANTE: Mantener este orden -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/examples.js"></script>
+    <script src="js/visualizer.js"></script>
+    <script src="js/analyzer.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
