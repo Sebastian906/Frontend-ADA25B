@@ -32,28 +32,95 @@ class Visualizer {
 
         this.diagramContainer.innerHTML = '';
 
-        // Verificar si hay archivos de diagramas
+        // ========== PRIORIDAD 1: Usar mermaid_code del backend ==========
+        if (result.mermaid_code) {
+            this.renderMermaidCode(result.mermaid_code);
+            return;
+        }
+
+        // ========== PRIORIDAD 2: Verificar archivos ==========
         const files = result.files || [];
-        const mdFile = files.find(f => f.endsWith('.md'));
         const svgFile = files.find(f => f.endsWith('.svg'));
         const pngFile = files.find(f => f.endsWith('.png'));
 
-        // Si hay archivo Markdown con Mermaid
-        if (mdFile) {
-            this.renderFromMarkdown(result);
-        }
-        // Si hay SVG
-        else if (svgFile) {
+        if (svgFile) {
             this.renderSVG(svgFile);
-        }
-        // Si hay PNG
-        else if (pngFile) {
+        } else if (pngFile) {
             this.renderPNG(pngFile);
-        }
-        // Generar diagrama simple si no hay archivos
-        else {
+        } else {
+            // ========== PRIORIDAD 3: Generar diagrama simple ==========
             this.renderSimpleDiagram(result);
         }
+    }
+
+    // ========== NUEVO MÉTODO ==========
+    renderMermaidCode(mermaidCode) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mermaid-diagram fade-in';
+        wrapper.style.cssText = `
+        background: #0f172a;
+        padding: 2rem;
+        border-radius: 8px;
+        border: 2px solid var(--primary-green);
+        min-height: 400px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+        // Crear contenedor para Mermaid
+        const mermaidContainer = document.createElement('div');
+        mermaidContainer.className = 'mermaid';
+        mermaidContainer.textContent = mermaidCode;
+
+        wrapper.appendChild(mermaidContainer);
+        this.diagramContainer.appendChild(wrapper);
+
+        // Renderizar con Mermaid
+        if (typeof mermaid !== 'undefined') {
+            try {
+                mermaid.run({
+                    querySelector: '.mermaid'
+                }).catch(err => {
+                    console.error('Error renderizando Mermaid:', err);
+                    this.showMermaidError(mermaidCode);
+                });
+            } catch (error) {
+                console.error('Error al ejecutar Mermaid:', error);
+                this.showMermaidError(mermaidCode);
+            }
+        }
+    }
+
+    // ========== MÉTODO PARA MOSTRAR ERROR ==========
+    showMermaidError(mermaidCode) {
+        if (!this.diagramContainer) return;
+
+        this.diagramContainer.innerHTML = `
+        <div style="
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 2px solid #ef4444;
+        ">
+            <div style="color: #ef4444; font-weight: 600; margin-bottom: 1rem;">
+                ⚠ Error al renderizar diagrama Mermaid
+            </div>
+            <details>
+                <summary style="color: var(--text-secondary); cursor: pointer; margin-bottom: 1rem;">
+                    Ver código Mermaid
+                </summary>
+                <pre style="
+                    background: #000;
+                    color: var(--primary-green);
+                    padding: 1rem;
+                    border-radius: 4px;
+                    overflow-x: auto;
+                    font-size: 0.85rem;
+                ">${mermaidCode}</pre>
+            </details>
+        </div>
+    `;
     }
 
     renderFromMarkdown(result) {
@@ -89,27 +156,34 @@ class Visualizer {
         // Generar diagrama de flujo simple basado en complejidad
         const complexity = result.complexity || {};
 
-        let mermaidCode = 'graph TD\n';
-        mermaidCode += '    Start[Inicio] --> Analyze[Análisis]\n';
+        let mermaidCode = 'flowchart TD\n';
+        mermaidCode += '    Start([Inicio]) --> Analyze[Análisis]\n';
 
         if (complexity.big_o) {
-            mermaidCode += `    Analyze --> BigO[Big-O: ${complexity.big_o}]\n`;
+            const bigOClean = complexity.big_o.replace(/[()]/g, '');
+            mermaidCode += `    Analyze --> BigO["Big-O: ${bigOClean}"]\n`;
         }
 
         if (complexity.omega) {
-            mermaidCode += `    Analyze --> Omega[Omega: ${complexity.omega}]\n`;
+            const omegaClean = complexity.omega.replace(/[()ΩΩ]/g, '');
+            mermaidCode += `    Analyze --> Omega["Omega: ${omegaClean}"]\n`;
         }
 
         if (complexity.theta) {
-            mermaidCode += `    Analyze --> Theta[Theta: ${complexity.theta}]\n`;
+            const thetaClean = complexity.theta.replace(/[()ΘΘ]/g, '');
+            mermaidCode += `    Analyze --> Theta["Theta: ${thetaClean}"]\n`;
         }
 
-        mermaidCode += '    BigO --> End[Resultado]\n';
+        mermaidCode += '    BigO --> End([Resultado])\n';
         mermaidCode += '    Omega --> End\n';
         mermaidCode += '    Theta --> End\n';
 
-        mermaidCode += '\n    classDef greenBox fill:#10b981,stroke:#059669,stroke-width:2px,color:#000\n';
-        mermaidCode += '    class BigO,Omega,Theta greenBox\n';
+        // Estilos corregidos
+        mermaidCode += '\n    style BigO fill:#10b981,stroke:#059669,stroke-width:2px,color:#000\n';
+        mermaidCode += '    style Omega fill:#10b981,stroke:#059669,stroke-width:2px,color:#000\n';
+        mermaidCode += '    style Theta fill:#10b981,stroke:#059669,stroke-width:2px,color:#000\n';
+        mermaidCode += '    style Start fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#10b981\n';
+        mermaidCode += '    style End fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#10b981\n';
 
         return mermaidCode;
     }
@@ -171,17 +245,25 @@ class Visualizer {
 
         patternsList.innerHTML = '';
 
-        if (!patterns || patterns.length === 0) {
+        // Verificar si patterns es un array válido
+        if (!Array.isArray(patterns) || patterns.length === 0) {
             patternsList.innerHTML = `
-        <div class="no-patterns" style="
-          text-align: center;
-          padding: 2rem;
-          color: var(--text-muted);
-          font-family: var(--font-mono);
-        ">
-          No se detectaron patrones algorítmicos específicos
-        </div>
-      `;
+            <div class="no-patterns" style="
+                text-align: center;
+                padding: 2rem;
+                color: var(--text-muted);
+                font-family: var(--font-mono);
+                background: var(--bg-dark);
+                border-radius: 8px;
+                border: 1px dashed var(--border-color);
+            ">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
+                <div>No se detectaron patrones algorítmicos específicos</div>
+                <div style="font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.7;">
+                    El algoritmo no coincide con patrones predefinidos
+                </div>
+            </div>
+        `;
             return;
         }
 
@@ -190,11 +272,45 @@ class Visualizer {
             patternDiv.className = 'pattern-badge fade-in-up';
             patternDiv.style.animationDelay = `${index * 0.1}s`;
 
+            // Extraer información del patrón
+            const name = pattern.name || pattern.description || 'Patrón desconocido';
+            const description = pattern.description || '';
+            const confidence = pattern.confidence || 'N/A';
+
             patternDiv.innerHTML = `
-        <div class="pattern-name">${pattern.name || pattern.description}</div>
-        <div class="pattern-complexity">${pattern.complexity || 'Complejidad no especificada'}</div>
-        ${pattern.confidence ? `<div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;">Confianza: ${pattern.confidence}</div>` : ''}
-      `;
+            <div class="pattern-name" style="
+                color: var(--primary-green);
+                font-weight: 600;
+                font-size: 1rem;
+                margin-bottom: 0.3rem;
+            ">
+                ${name}
+            </div>
+            ${description && description !== name ? `
+                <div style="
+                    color: var(--text-secondary);
+                    font-size: 0.9rem;
+                    margin-bottom: 0.3rem;
+                ">
+                    ${description}
+                </div>
+            ` : ''}
+            <div style="
+                color: var(--text-muted);
+                font-size: 0.85rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            ">
+                <span>Confianza:</span>
+                <span style="
+                    color: var(--accent-green);
+                    font-weight: 600;
+                ">
+                    ${confidence}
+                </span>
+            </div>
+        `;
 
             patternsList.appendChild(patternDiv);
         });

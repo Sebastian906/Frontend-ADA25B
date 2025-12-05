@@ -53,20 +53,53 @@ class Analyzer {
         }
 
         // Mostrar complejidades
+        console.log('→ Renderizando complejidades...');
         this.displayComplexity(data.complexity);
 
         // Mostrar patrones (si existen)
+        console.log('→ Renderizando patrones...');
         if (data.patterns) {
             visualizer.renderPatterns(data.patterns);
         }
 
+        // Renderizar análisis línea por línea
+        console.log('→ Renderizando análisis línea por línea...');
+        if (data.line_analysis && data.line_analysis.length > 0) {
+            console.log(`  ✓ ${data.line_analysis.length} líneas encontradas`);
+            analysisRenderer.renderLineAnalysis(data.line_analysis);
+        } else {
+            console.warn('  ⚠ No hay datos de line_analysis');
+        }
+
+        // Renderizar ecuación de recurrencia
+        console.log('→ Renderizando ecuación de recurrencia...');
+        if (data.recurrence) {
+            console.log('  ✓ Recurrencia encontrada:', data.recurrence);
+            analysisRenderer.renderRecurrence(data.recurrence, data.line_analysis);
+        } else {
+            console.warn('  ⚠ No hay datos de recurrence');
+        }
+
+        // Renderizar validación con Gemini
+        console.log('→ Renderizando validación...');
+        if (data.validation) {
+            console.log('  ✓ Validación encontrada, score:', data.validation.overall_score);
+            analysisRenderer.renderValidation(data.validation);
+        } else {
+            console.warn('  ⚠ No hay datos de validation');
+        }
+
         // Mostrar diagrama
+        console.log('→ Renderizando diagrama...');
         visualizer.renderDiagram(data);
 
         // Mostrar archivos generados
+        console.log('→ Renderizando archivos...');
         if (data.files) {
             visualizer.renderFiles(data.files);
         }
+
+        console.log('✓ Todos los resultados renderizados');
 
         // Scroll suave hacia resultados
         this.scrollToResults();
@@ -204,6 +237,7 @@ class Analyzer {
         this.currentResult = null;
         this.hideResults();
         visualizer.clear();
+        analysisRenderer.clear();
 
         // Limpiar valores
         const elements = ['big-o', 'omega', 'theta', 'explanation'];
