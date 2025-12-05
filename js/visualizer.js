@@ -5,26 +5,9 @@ class Visualizer {
     }
 
     initMermaid() {
-        // Configurar Mermaid.js
-        if (typeof mermaid !== 'undefined') {
-            mermaid.initialize({
-                startOnLoad: false,
-                theme: 'dark',
-                themeVariables: {
-                    primaryColor: '#10b981',
-                    primaryTextColor: '#f1f5f9',
-                    primaryBorderColor: '#059669',
-                    lineColor: '#34d399',
-                    secondaryColor: '#1e293b',
-                    tertiaryColor: '#0f172a',
-                    background: '#0f172a',
-                    mainBkg: '#1e293b',
-                    secondBkg: '#0f172a',
-                    textColor: '#f1f5f9',
-                    fontSize: '14px'
-                }
-            });
-        }
+        // Ya no necesitamos inicializar Mermaid
+        // El código se muestra como texto, no se renderiza
+        console.log('✓ Visualizador Mermaid listo');
     }
 
     renderDiagram(result) {
@@ -32,113 +15,76 @@ class Visualizer {
 
         this.diagramContainer.innerHTML = '';
 
-        // ========== PRIORIDAD 1: Usar mermaid_code del backend ==========
+        // ========== PRIORIDAD 1: Usar SVG del backend (Graphviz) ==========
+        const files = result.files || [];
+        const svgFile = files.find(f => f.endsWith('.svg'));
+        
+        if (svgFile) {
+            this.renderSVG(svgFile);
+            return;
+        }
+
+        // ========== PRIORIDAD 2: Usar PNG ==========
+        const pngFile = files.find(f => f.endsWith('.png'));
+        if (pngFile) {
+            this.renderPNG(pngFile);
+            return;
+        }
+
+        // ========== PRIORIDAD 3: Mostrar código Mermaid ==========
         if (result.mermaid_code) {
             this.renderMermaidCode(result.mermaid_code);
             return;
         }
 
-        // ========== PRIORIDAD 2: Verificar archivos ==========
-        const files = result.files || [];
-        const svgFile = files.find(f => f.endsWith('.svg'));
-        const pngFile = files.find(f => f.endsWith('.png'));
-
-        if (svgFile) {
-            this.renderSVG(svgFile);
-        } else if (pngFile) {
-            this.renderPNG(pngFile);
-        } else {
-            // ========== PRIORIDAD 3: Generar diagrama simple ==========
-            this.renderSimpleDiagram(result);
-        }
+        // ========== PRIORIDAD 4: Generar diagrama simple ==========
+        this.renderSimpleDiagram(result);
     }
 
     // ========== NUEVO MÉTODO ==========
     renderMermaidCode(mermaidCode) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'mermaid-diagram fade-in';
-        wrapper.style.cssText = `
-        background: #0f172a;
-        padding: 2rem;
-        border-radius: 8px;
-        border: 2px solid var(--primary-green);
-        min-height: 400px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    `;
-
-        // Crear contenedor para Mermaid
-        const mermaidContainer = document.createElement('div');
-        mermaidContainer.className = 'mermaid';
-        mermaidContainer.textContent = mermaidCode;
-
-        wrapper.appendChild(mermaidContainer);
-        this.diagramContainer.appendChild(wrapper);
-
-        // Renderizar con Mermaid
-        if (typeof mermaid !== 'undefined') {
-            try {
-                mermaid.run({
-                    querySelector: '.mermaid'
-                }).catch(err => {
-                    console.error('Error renderizando Mermaid:', err);
-                    this.showMermaidError(mermaidCode);
-                });
-            } catch (error) {
-                console.error('Error al ejecutar Mermaid:', error);
-                this.showMermaidError(mermaidCode);
-            }
+        if (!this.diagramContainer) {
+            console.error('diagramContainer no encontrado');
+            return;
         }
-    }
 
-    // ========== MÉTODO PARA MOSTRAR ERROR ==========
-    showMermaidError(mermaidCode) {
-        if (!this.diagramContainer) return;
+        console.log('Mostrando código Mermaid');
 
-        this.diagramContainer.innerHTML = `
-        <div style="
-            background: #1e293b;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mermaid-code-wrapper fade-in';
+        wrapper.style.cssText = `
+            background: #0f172a;
             padding: 2rem;
             border-radius: 8px;
-            border: 2px solid #ef4444;
-        ">
-            <div style="color: #ef4444; font-weight: 600; margin-bottom: 1rem;">
-                ⚠ Error al renderizar diagrama Mermaid
-            </div>
-            <details>
-                <summary style="color: var(--text-secondary); cursor: pointer; margin-bottom: 1rem;">
-                    Ver código Mermaid
-                </summary>
-                <pre style="
-                    background: #000;
-                    color: var(--primary-green);
-                    padding: 1rem;
-                    border-radius: 4px;
-                    overflow-x: auto;
-                    font-size: 0.85rem;
-                ">${mermaidCode}</pre>
-            </details>
-        </div>
-    `;
+            border: 2px solid var(--primary-green);
+            overflow-x: auto;
+        `;
+
+        const codeBlock = document.createElement('pre');
+        codeBlock.style.cssText = `
+            background: #000;
+            color: var(--primary-green);
+            padding: 1.5rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 0;
+            overflow-x: auto;
+            line-height: 1.5;
+        `;
+        codeBlock.textContent = mermaidCode;
+
+        wrapper.appendChild(codeBlock);
+        this.diagramContainer.appendChild(wrapper);
     }
+
 
     renderFromMarkdown(result) {
         // Extraer código Mermaid del resultado
         const mermaidCode = this.extractMermaidCode(result);
 
         if (mermaidCode) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'mermaid-diagram fade-in';
-            wrapper.innerHTML = mermaidCode;
-            this.diagramContainer.appendChild(wrapper);
-
-            // Renderizar con Mermaid
-            if (typeof mermaid !== 'undefined') {
-                mermaid.run({
-                    querySelector: '.mermaid-diagram'
-                });
-            }
+            this.renderMermaidCode(mermaidCode);
         }
     }
 
@@ -189,23 +135,65 @@ class Visualizer {
     }
 
     renderSVG(svgPath) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'svg-diagram-wrapper fade-in';
+        wrapper.style.cssText = `
+            background: #0f172a;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 2px solid var(--primary-green);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            max-height: 600px;
+        `;
+
         const img = document.createElement('img');
         img.src = svgPath;
-        img.alt = 'AST Diagram';
-        img.className = 'diagram-image fade-in';
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        this.diagramContainer.appendChild(img);
+        img.alt = 'AST Diagram - SVG';
+        img.className = 'diagram-image';
+        img.style.cssText = `
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        `;
+
+        wrapper.appendChild(img);
+        this.diagramContainer.appendChild(wrapper);
+        
+        console.log('✓ SVG renderizado:', svgPath);
     }
 
     renderPNG(pngPath) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'png-diagram-wrapper fade-in';
+        wrapper.style.cssText = `
+            background: #0f172a;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 2px solid var(--primary-green);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            max-height: 600px;
+        `;
+
         const img = document.createElement('img');
         img.src = pngPath;
-        img.alt = 'AST Diagram';
-        img.className = 'diagram-image fade-in';
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        this.diagramContainer.appendChild(img);
+        img.alt = 'AST Diagram - PNG';
+        img.className = 'diagram-image';
+        img.style.cssText = `
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        `;
+
+        wrapper.appendChild(img);
+        this.diagramContainer.appendChild(wrapper);
+        
+        console.log('✓ PNG renderizado:', pngPath);
     }
 
     renderSimpleDiagram(result) {

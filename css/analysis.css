@@ -210,6 +210,86 @@
     color: var(--accent-green);
 }
 
+/* === MERMAID DIAGRAM === */
+.mermaid-diagram-wrapper {
+    background: #0f172a !important;
+    border: 2px solid var(--primary-green) !important;
+    border-radius: 8px !important;
+    padding: 2rem !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow-x: auto !important;
+}
+
+/* Estilos para Mermaid SVG */
+.mermaid-diagram-wrapper .mermaid {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.mermaid-diagram-wrapper .mermaid svg {
+    background: transparent !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Estilos de texto en Mermaid */
+.mermaid-diagram-wrapper .mermaid text {
+    fill: #f1f5f9 !important;
+    font-family: 'Courier New', monospace !important;
+}
+
+/* Estilos de nodos en Mermaid */
+.mermaid-diagram-wrapper .mermaid .node {
+    fill: #1e293b !important;
+    stroke: #34d399 !important;
+    stroke-width: 2px !important;
+}
+
+.mermaid-diagram-wrapper .mermaid .loop {
+    fill: #FFB6C1 !important;
+    stroke: #333 !important;
+}
+
+.mermaid-diagram-wrapper .mermaid .condition {
+    fill: #87CEEB !important;
+    stroke: #333 !important;
+}
+
+.mermaid-diagram-wrapper .mermaid .call {
+    fill: #98FB98 !important;
+    stroke: #333 !important;
+}
+
+.mermaid-diagram-wrapper .mermaid .function {
+    fill: #FFD700 !important;
+    stroke: #333 !important;
+}
+
+.mermaid-diagram-wrapper .mermaid .return {
+    fill: #FFA500 !important;
+    stroke: #333 !important;
+}
+
+/* Líneas de conexión */
+.mermaid-diagram-wrapper .mermaid path {
+    stroke: #34d399 !important;
+    stroke-width: 2px !important;
+}
+
+.mermaid-diagram-wrapper .mermaid line {
+    stroke: #34d399 !important;
+    stroke-width: 2px !important;
+}
+
+/* Puntas de flecha */
+.mermaid-diagram-wrapper .mermaid marker {
+    fill: #34d399 !important;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
     .line-analysis-table {
@@ -227,5 +307,14 @@
 
     .score-value {
         font-size: 2rem;
+    }
+
+    .mermaid-diagram-wrapper {
+        padding: 1rem !important;
+        min-height: 300px !important;
+    }
+
+    .mermaid-diagram-wrapper .mermaid {
+        font-size: 0.8em !important;
     }
 }

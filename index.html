@@ -13,8 +13,22 @@
     <link rel="stylesheet" href="css/analysis.css">
     <link rel="stylesheet" href="css/animations.css">
 
-    <!-- Mermaid.js para diagramas -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- Mermaid.js para diagramas - Versión 10.x -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        // Pre-configurar Mermaid tan pronto como sea posible
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'dark',
+                logLevel: 'debug',
+                securityLevel: 'loose',
+                fontSize: 14,
+                fontFamily: "'Courier New', monospace"
+            });
+            console.log('✓ Mermaid pre-configurado');
+        }
+    </script>
 
     <!-- Favicon (opcional) -->
     <link rel="icon" type="image/svg+xml"

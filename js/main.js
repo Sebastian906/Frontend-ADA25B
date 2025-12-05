@@ -365,11 +365,19 @@ function loadExampleCode(exampleId) {
     const example = getExample(exampleId);
     if (!example) return;
 
+    // Obtener tipo de código seleccionado
+    const codeTypeSelect = document.getElementById('code-type');
+    const codeType = codeTypeSelect ? codeTypeSelect.value : 'pseudocode';
+    
+    // Obtener código del tipo seleccionado
+    const code = getExampleCode(exampleId, codeType);
+    if (!code) return;
+
     const codeInput = document.getElementById('code-input');
     if (codeInput) {
-        codeInput.value = example.code;
-        updateEditorStats(example.code);
-        analyzer.showSuccess(`Ejemplo cargado: ${example.name}`);
+        codeInput.value = code;
+        updateEditorStats(code);
+        analyzer.showSuccess(`Ejemplo cargado: ${example.name} (${codeType})`);
 
         // Scroll al editor
         codeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -386,8 +394,10 @@ function loadInitialExample() {
     if (binarySearch) {
         const codeInput = document.getElementById('code-input');
         if (codeInput) {
-            codeInput.value = binarySearch.code;
-            updateEditorStats(binarySearch.code);
+            // Usar pseudocode por defecto
+            const code = getExampleCode('binary_search', 'pseudocode');
+            codeInput.value = code;
+            updateEditorStats(code);
         }
     }
 }
